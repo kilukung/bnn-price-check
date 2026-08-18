@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Price Watch · สรุปการตรวจราคา BaNANA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f7f8; --card:#fff; --line:#e4e4e7; --line-soft:#f1f1f3;
+  --text:#17181c; --muted:#71717a; --faint:#a1a1aa; --dim:#3f3f46;
+  --accent:#f2b60d; --accent-ink:#8a6300; --accent-soft:#fdf3d6; --accent-pale:#f6e8bb;
+  --ok:#17754f; --ok-bg:#e5f3ec; --bad:#b3261e; --bad-bg:#fbeceb;
+  --info:#1d4ed8; --info-bg:#e8eeff; --neutral:#52525b; --neutral-bg:#f4f4f5;
+  --warn:#92600a; --warn-bg:#fdf3e0;
+}
+* { box-sizing: border-box; }
+body {
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:"IBM Plex Sans Thai","IBM Plex Sans",-apple-system,system-ui,sans-serif;
+}
+a { color:inherit; text-decoration:none; }
+.mono { font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums; }
+
+/* layout */
+.shell { display:flex; min-height:100vh; }
+.side {
+  width:232px; flex:none; background:var(--card); border-right:1px solid var(--line);
+  padding:22px 14px; display:flex; flex-direction:column; gap:26px;
+  position:sticky; top:0; height:100vh;
+}
+.brand { display:flex; align-items:center; gap:10px; padding:0 8px; }
+.brand .mark { width:26px; height:26px; border-radius:8px; background:var(--accent); flex:none; }
+.brand .name { font:600 14px "IBM Plex Sans",sans-serif; }
+.nav { display:flex; flex-direction:column; gap:2px; }
+.nav a {
+  padding:9px 12px; border-radius:9px; color:var(--dim);
+  font:500 13.5px "IBM Plex Sans Thai",sans-serif;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.nav a:hover { background:var(--neutral-bg); }
+.nav a .en { font:400 11px "IBM Plex Sans",sans-serif; color:var(--faint); }
+.nav a.active { background:var(--accent-soft); color:var(--accent-ink); font-weight:600; }
+.nav a.active .en { color:#b58c2b; }
+.nav .badge {
+  padding:1px 7px; border-radius:10px; background:var(--bad-bg); color:var(--bad);
+  font:600 10.5px "IBM Plex Mono",monospace;
+}
+.side-health {
+  margin-top:auto; padding:12px; border-radius:11px; background:var(--bg);
+  border:1px solid var(--line); display:flex; flex-direction:column; gap:6px;
+}
+.side-health .title { display:flex; align-items:center; gap:7px; font:600 12px "IBM Plex Sans Thai",sans-serif; }
+.side-health .dot { width:7px; height:7px; border-radius:4px; flex:none; }
+.side-health .note { font:400 11.5px/1.5 "IBM Plex Sans Thai",sans-serif; color:var(--muted); }
+.h-ok { color:var(--ok); } .h-ok .dot { background:var(--ok); }
+.h-warn { color:var(--warn); } .h-warn .dot { background:var(--warn); }
+.h-bad { color:var(--bad); } .h-bad .dot { background:var(--bad); }
+
+.main { flex:1; min-width:0; display:flex; flex-direction:column; }
+.topbar {
+  padding:20px 28px; border-bottom:1px solid var(--line); background:var(--card);
+  display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;
+}
+.topbar h1 { margin:0; font:600 19px "IBM Plex Sans Thai",sans-serif; }
+.topbar .sub { font:400 12.5px "IBM Plex Sans",sans-serif; color:var(--muted); margin-top:3px; }
+.content { padding:24px 28px 56px; display:flex; flex-direction:column; gap:20px; }
+.btn {
+  padding:9px 14px; border-radius:9px; border:1px solid var(--line); background:var(--card);
+  font:500 13px "IBM Plex Sans Thai",sans-serif; color:var(--dim);
+}
+.btn.primary { background:var(--accent); border-color:var(--accent); color:var(--text); }
+
+/* cards */
+.card { background:var(--card); border:1px solid var(--line); border-radius:13px; }
+.card-head {
+  padding:15px 18px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  font:600 14.5px "IBM Plex Sans Thai",sans-serif;
+}
+.pad { padding:16px 18px; }
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.stat { background:var(--card); border:1px solid var(--line); border-radius:13px; padding:16px; display:flex; flex-direction:column; gap:7px; }
+.stat .label { font:600 11px "IBM Plex Sans",sans-serif; letter-spacing:.07em; color:var(--faint); }
+.stat .value { font:500 26px "IBM Plex Mono",monospace; letter-spacing:-.02em; }
+.stat .foot { font:400 12px "IBM Plex Sans Thai",sans-serif; color:var(--muted); }
+.cols { display:grid; grid-template-columns:1.55fr 1fr; gap:18px; align-items:start; }
+.stack { display:flex; flex-direction:column; gap:18px; }
+
+/* pills */
+.pill { display:inline-block; padding:3px 9px; border-radius:20px; font:600 11px "IBM Plex Sans Thai",sans-serif; white-space:nowrap; }
+.pill.drop, .pill.ok { background:var(--ok-bg); color:var(--ok); }
+.pill.rise, .pill.bad { background:var(--bad-bg); color:var(--bad); }
+.pill.restock, .pill.accent { background:var(--info-bg); color:var(--info); }
+.pill.oos, .pill.neutral { background:var(--neutral-bg); color:var(--neutral); }
+.pill.warn { background:var(--warn-bg); color:var(--warn); }
+.t-drop { color:var(--ok); } .t-rise { color:var(--bad); }
+.t-oos, .t-neutral { color:var(--faint); }
+.t-neutral.empty { color:var(--faint); } .t-restock { color:var(--info); }
+
+/* tables */
+table { width:100%; border-collapse:collapse; }
+th {
+  text-align:left; padding:12px 18px; font:600 11px "IBM Plex Sans",sans-serif;
+  letter-spacing:.06em; color:var(--faint); border-bottom:1px solid var(--line); white-space:nowrap;
+}
+td { padding:12px 18px; border-top:1px solid var(--line-soft); font:400 13.5px "IBM Plex Sans",sans-serif; vertical-align:middle; }
+tbody tr:first-child td { border-top:none; }
+th.r, td.r { text-align:right; }
+td .model { font:500 13.5px "IBM Plex Sans",sans-serif; display:block; }
+td .meta { font:400 11.5px "IBM Plex Sans Thai",sans-serif; color:var(--faint); }
+td.num { font:500 13px "IBM Plex Mono",monospace; white-space:nowrap; }
+td.num.was { font-weight:400; color:var(--faint); }
+.bar-cell { width:26px; padding-right:0; }
+.bar { width:6px; height:26px; border-radius:3px; display:block; }
+.bar.drop { background:var(--ok); } .bar.rise { background:var(--bad); }
+.bar.restock { background:var(--info); } .bar.oos, .bar.neutral { background:var(--faint); }
+.scroll { overflow-x:auto; }
+.scroll table { min-width:520px; }
+.scroll.wide table { min-width:680px; }
+td .was { color:var(--faint); font-weight:400; }
+
+/* run group heading */
+.run-head { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.run-head .when { font:600 12px "IBM Plex Sans",sans-serif; letter-spacing:.07em; color:var(--faint); }
+.run-head .rule { flex:1; height:1px; background:var(--line); }
+.run-head .id { font:400 11.5px "IBM Plex Mono",monospace; color:var(--faint); }
+
+/* activity chart */
+.chart { display:flex; align-items:flex-end; gap:5px; height:78px; }
+.chart div { flex:1; background:var(--accent-pale); border-radius:3px; min-height:4px; }
+.chart div.hit { background:var(--accent); }
+.axis { display:flex; justify-content:space-between; font:400 11px "IBM Plex Mono",monospace; color:var(--faint); }
+
+/* history list */
+.runs { list-style:none; margin:0; padding:0; }
+.runs > li { padding:14px 18px; border-top:1px solid var(--line-soft); }
+.runs > li:first-child { border-top:none; }
+.runs .line { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.runs .when { font:400 13px "IBM Plex Mono",monospace; color:var(--muted); }
+.runs ul { margin:8px 0 0; padding-left:18px; }
+.runs ul li { margin-bottom:6px; font:400 13px "IBM Plex Sans",sans-serif; }
+.muted { color:var(--muted); margin:0; font:400 12.5px "IBM Plex Sans Thai",sans-serif; }
+.section-label { font:600 11px "IBM Plex Sans",sans-serif; letter-spacing:.08em; color:var(--faint); }
+footer { padding:0 28px 40px; color:var(--faint); font:400 11.5px "IBM Plex Mono",monospace; }
+
+/* view switching */
+.view { display:none; flex-direction:column; gap:20px; }
+.view.active { display:flex; }
+.tabbar { display:none; }
+
+/* mobile */
+@media (max-width: 900px) {
+  .cols, .stats { grid-template-columns:1fr 1fr; }
+}
+@media (max-width: 760px) {
+  .side { display:none; }
+  .shell { display:block; }
+  .topbar { padding:16px 20px; }
+  .topbar h1 { font-size:22px; }
+  .content { padding:16px 20px 104px; gap:16px; }
+  .stats { grid-template-columns:1fr 1fr; }
+  .cols { grid-template-columns:1fr; }
+  /* tables collapse into the stacked alert cards from the phone mockup */
+  .tbl { border:none; background:transparent; border-radius:0; }
+  .tbl .card-head { border:none; padding:0 0 10px; }
+  .tbl .scroll, .tbl.scroll { overflow:visible; }
+  .tbl table, .tbl.scroll table { min-width:0; }
+  .tbl thead, .tbl td.bar-cell { display:none; }
+  .tbl table, .tbl tbody, .tbl tr, .tbl td { display:block; width:100%; }
+  .tbl tr {
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:16px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .tbl td { border:none; padding:0; text-align:left !important; }
+  .tbl tr { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 10px; }
+  .tbl td { width:auto; }
+  .tbl td.name { flex-basis:100%; }
+  .tbl td.st { margin-left:auto; }
+  .tbl td.was { text-decoration:line-through; }
+  .tbl td.empty { display:none; }
+  .tbl td.num { font-size:16px; }
+  .tbl td .meta { margin-top:2px; }
+  .tabbar {
+    position:fixed; left:0; right:0; bottom:0; height:76px; display:flex;
+    background:rgba(255,255,255,.9); backdrop-filter:blur(18px);
+    border-top:1px solid var(--line); padding:10px 12px 0; z-index:20;
+  }
+  .tabbar a {
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;
+    color:var(--faint); font:500 10.5px "IBM Plex Sans Thai",sans-serif;
+  }
+  .tabbar a .ico { width:22px; height:22px; border-radius:6px; border:2px solid var(--faint); }
+  .tabbar a.active { color:var(--accent-ink); }
+  .tabbar a.active .ico { background:var(--accent); border-color:var(--accent); }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><span class="mark"></span><span class="name">Price Watch</span></div>
+    <nav class="nav"><a href='#overview' data-view='overview'><span>ภาพรวม</span><span class='en'>Overview</span></a><a href='#changes' data-view='changes'><span>การเปลี่ยนแปลง</span><span class='badge'>5</span></a><a href='#tracked' data-view='tracked'><span>สินค้าที่ติดตาม</span><span class='en'>Tracked</span></a><a href='#history' data-view='history'><span>ประวัติการตรวจ</span><span class='en'>Runs</span></a></nav>
+    <div class="side-health h-ok">
+      <div class="title"><span class="dot"></span>ระบบทำงานปกติ</div>
+      <div class="note">ตรวจราคาสำเร็จในรอบล่าสุด</div>
+      <div class="note">66 รอบ · ตรวจล่าสุด 23:37</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <h1>สรุปการตรวจราคา BaNANA</h1>
+        <div class="sub">bnn.in.th · iPhone &amp; iPad · ตรวจล่าสุด 2026-08-17 23:37:17</div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <span class="btn">39 รายการที่ติดตาม</span>
+        <span class="btn primary">วันนี้ 5 การเปลี่ยนแปลง</span>
+      </div>
+    </header>
+
+    <div class="content">
+      
+<div class="view" id="view-overview">
+  <div class="stats">
+    <div class="stat">
+      <div class="label">CHANGES TODAY</div>
+      <div class="value">5</div>
+      <div class="foot">ลดราคา 0 · ขึ้นราคา 2 · สต็อก 3</div>
+    </div>
+    <div class="stat">
+      <div class="label">BIGGEST DROP</div>
+      <div class="value t-drop">−15.1%</div>
+      <div class="foot">Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</div>
+    </div>
+    <div class="stat">
+      <div class="label">TRACKED</div>
+      <div class="value">39</div>
+      <div class="foot">iPhone 15 · iPad 24</div>
+    </div>
+    <div class="stat">
+      <div class="label">OUT OF STOCK</div>
+      <div class="value">12</div>
+      <div class="foot">จาก 39 รายการที่ติดตาม</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="card tbl">
+      <div class="card-head">การเปลี่ยนแปลงล่าสุด<a href="#changes" data-view="changes"
+        style="font:500 12.5px 'IBM Plex Sans Thai',sans-serif;color:var(--accent-ink)">ดูทั้งหมด</a></div>
+      <div class="scroll"><table>
+        <thead><tr><th>MODEL / รุ่น</th><th class="r">FROM → TO</th><th class="r">CHANGE</th></tr></thead>
+        <tbody><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-11-a16-wi-fi-cellular-128gb-pink-2025-11th-gen-195950105377_r67g7n' target='_blank' class='model'>Apple iPad 11 (A16) Wi-Fi + Cellular 11 inch (2025)</a><span class='meta'>23:20 · มีสินค้าแล้ว</span></td><td class='num r'><span class='was'>—</span> → ฿22,900–33,900</td><td class='num r t-neutral empty'>—</td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>23:20 · สินค้าหมด</span></td><td class='num r'><span class='was'>฿15,200</span> → —</td><td class='num r t-neutral empty'>—</td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-cellular-128gb-space-gray-2024-7th-gen-195949755279_r0kp9k' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi + Cellular 8.3 inch</a><span class='meta'>23:20 · ขึ้นราคา</span></td><td class='num r'><span class='was'>฿24,600–35,600</span> → ฿27,900–38,900</td><td class='num r t-rise'>+13.4%</td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>23:20 · มีสินค้าแล้ว</span></td><td class='num r'><span class='was'>฿18,600–29,600</span> → ฿21,900–32,900</td><td class='num r t-rise'>+17.7%</td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3' target='_blank' class='model'>Apple iPad Air 11 inch (M4) Wi-Fi</a><span class='meta'>23:20 · ขึ้นราคา</span></td><td class='num r'><span class='was'>฿24,700–46,700</span> → ฿40,900–62,900</td><td class='num r t-rise'>+65.6%</td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-256gb-with-standard-glass-space-black-2024-5th-gen-195949222542_dk0wwq' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi</a><span class='meta'>11:30 · สินค้าหมด</span></td><td class='num r'><span class='was'>฿29,900–53,900</span> → —</td><td class='num r t-neutral empty'>—</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <div class="stack">
+      <div class="card pad" style="display:flex;flex-direction:column;gap:14px">
+        <div style="font:600 14.5px 'IBM Plex Sans Thai',sans-serif">การเปลี่ยนแปลงต่อรอบ 14 วันล่าสุด</div>
+        <div class="chart"><div class='hit' style='height:40%' title='2026-08-04 · 2 รายการ'></div><div class='hit' style='height:40%' title='2026-08-05 · 2 รายการ'></div><div class='' style='height:14%' title='2026-08-06 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-07 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-08 · 0 รายการ'></div><div class='hit' style='height:80%' title='2026-08-09 · 4 รายการ'></div><div class='' style='height:14%' title='2026-08-10 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-11 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-12 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-13 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-14 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-15 · 0 รายการ'></div><div class='' style='height:14%' title='2026-08-16 · 0 รายการ'></div><div class='hit' style='height:100%' title='2026-08-17 · 5 รายการ'></div></div>
+        <div class="axis"><span>04 ส.ค.</span><span>17 ส.ค.</span></div>
+      </div>
+      <div class="card pad" style="display:flex;flex-direction:column;gap:10px">
+        <div style="font:600 14.5px 'IBM Plex Sans Thai',sans-serif">สถานะระบบ</div>
+        <div class="side-health h-ok" style="margin:0;background:var(--bg)">
+          <div class="title"><span class="dot"></span>ระบบทำงานปกติ</div>
+          <div class="note">ตรวจราคาสำเร็จในรอบล่าสุด</div>
+        </div>
+        <div class="muted">รันทั้งหมด 66 รอบ · ตรวจอัตโนมัติทุกวัน 11:30 น.</div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+<div class="view" id="view-changes">
+  <div style="display:flex;flex-direction:column;gap:22px">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">วันนี้ · TODAY · 23:20</span>
+          <span class="rule"></span>
+          <span class="id">5 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-11-a16-wi-fi-cellular-128gb-pink-2025-11th-gen-195950105377_r67g7n' target='_blank' class='model'>Apple iPad 11 (A16) Wi-Fi + Cellular 11 inch (2025)</a><span class='meta'>23:20 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿22,900–33,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>23:20 · สินค้าหมด</span></td><td class='num was r'>฿15,200</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar rise'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-cellular-128gb-space-gray-2024-7th-gen-195949755279_r0kp9k' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi + Cellular 8.3 inch</a><span class='meta'>23:20 · ขึ้นราคา</span></td><td class='num was r'>฿24,600–35,600</td><td class='num r'>฿27,900–38,900</td><td class='num r t-rise'>+13.4%</td><td class='r st'><span class='pill rise'>ขึ้นราคา</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>23:20 · มีสินค้าแล้ว</span></td><td class='num was r'>฿18,600–29,600</td><td class='num r'>฿21,900–32,900</td><td class='num r t-rise'>+17.7%</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar rise'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3' target='_blank' class='model'>Apple iPad Air 11 inch (M4) Wi-Fi</a><span class='meta'>23:20 · ขึ้นราคา</span></td><td class='num was r'>฿24,700–46,700</td><td class='num r'>฿40,900–62,900</td><td class='num r t-rise'>+65.6%</td><td class='r st'><span class='pill rise'>ขึ้นราคา</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">09 ส.ค. 2026 · 11:30</span>
+          <span class="rule"></span>
+          <span class="id">4 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-256gb-with-standard-glass-space-black-2024-5th-gen-195949222542_dk0wwq' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi</a><span class='meta'>11:30 · สินค้าหมด</span></td><td class='num was r'>฿29,900–53,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:30 · สินค้าหมด</span></td><td class='num was r'>฿18,600–29,600</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m3-wi-fi-cellular-256gb-space-grey-2025-2nd-gen-195949964800_d20nm6' target='_blank' class='model'>Apple iPad Air 13 inch (M3) Wi-Fi + Cellular</a><span class='meta'>11:30 · สินค้าหมด</span></td><td class='num was r'>฿31,900–49,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿15,200</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">05 ส.ค. 2026 · 11:31</span>
+          <span class="rule"></span>
+          <span class="id">2 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:31 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿18,600–29,600</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>11:31 · สินค้าหมด</span></td><td class='num was r'>฿15,200</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">04 ส.ค. 2026 · 11:43</span>
+          <span class="rule"></span>
+          <span class="id">2 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:43 · สินค้าหมด</span></td><td class='num was r'>฿18,600–29,600</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>11:43 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿15,200</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">03 ส.ค. 2026 · 11:33</span>
+          <span class="rule"></span>
+          <span class="id">7 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-1tb-with-nano-texture-glass-space-black-2024-7th-gen-195949467851_z3qg49' target='_blank' class='model'>Apple iPad Pro 13 inch (M4) Wi-Fi with Nano-texture glass</a><span class='meta'>11:33 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿58,900–66,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-256gb-with-standard-glass-space-black-2024-7th-gen-195949238710_z3qggl' target='_blank' class='model'>Apple iPad Pro 13 inch (M4) Wi-Fi</a><span class='meta'>11:33 · สินค้าหมด</span></td><td class='num was r'>฿38,900–67,200</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:33 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿18,600–29,600</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>11:33 · สินค้าหมด</span></td><td class='num was r'>฿15,200</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-max-256gb-cosmic-orange-195950639100_dyn0w4' target='_blank' class='model'>Apple iPhone 17 Pro Max</a><span class='meta'>11:33 · ลดราคา</span></td><td class='num was r'>฿48,900–80,900</td><td class='num r'>฿44,980–76,980</td><td class='num r t-drop'>−8.0%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-256gb-deep-blue-195950627657_rqn5v8' target='_blank' class='model'>Apple iPhone 17 Pro</a><span class='meta'>11:33 · ลดราคา</span></td><td class='num was r'>฿43,900–59,900</td><td class='num r'>฿39,980–55,980</td><td class='num r t-drop'>−8.9%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr><tr><td class='bar-cell'><span class='bar rise'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-256gb-black-195950643596_zo7380' target='_blank' class='model'>Apple iPhone 17</a><span class='meta'>11:33 · ขึ้นราคา</span></td><td class='num was r'>฿29,500–37,500</td><td class='num r'>฿29,900–37,900</td><td class='num r t-rise'>+1.4%</td><td class='r st'><span class='pill rise'>ขึ้นราคา</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">24 ก.ค. 2026 · 11:42</span>
+          <span class="rule"></span>
+          <span class="id">3 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-256gb-with-standard-glass-space-black-2024-7th-gen-195949238710_z3qggl' target='_blank' class='model'>Apple iPad Pro 13 inch (M4) Wi-Fi</a><span class='meta'>11:42 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿38,900–67,200</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:42 · สินค้าหมด</span></td><td class='num was r'>฿18,600–29,600</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>11:42 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿15,200</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">22 ก.ค. 2026 · 08:22</span>
+          <span class="rule"></span>
+          <span class="id">1 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-cellular-256gb-with-standard-glass-silver-2025-195950401080_zv44y4' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi + Cellular</a><span class='meta'>08:22 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿49,900–90,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">21 ก.ค. 2026 · 11:42</span>
+          <span class="rule"></span>
+          <span class="id">8 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-cellular-256gb-with-standard-glass-silver-2025-195950401080_zv44y4' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi + Cellular</a><span class='meta'>11:42 · สินค้าหมด</span></td><td class='num was r'>฿49,900–90,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>11:42 · สินค้าหมด</span></td><td class='num was r'>฿15,200</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-cellular-128gb-space-gray-2024-7th-gen-195949755279_r0kp9k' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi + Cellular 8.3 inch</a><span class='meta'>11:42 · ลดราคา</span></td><td class='num was r'>฿27,900–38,900</td><td class='num r'>฿24,600–35,600</td><td class='num r t-drop'>−11.8%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:42 · ลดราคา</span></td><td class='num was r'>฿21,900–32,900</td><td class='num r'>฿18,600–29,600</td><td class='num r t-drop'>−15.1%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-cellular-128gb-starlight-2026-195950785258_dn8gw2' target='_blank' class='model'>Apple iPad Air 13 inch (M4) Wi-Fi + Cellular</a><span class='meta'>11:42 · ลดราคา</span></td><td class='num was r'>฿40,900–62,900</td><td class='num r'>฿37,800–59,800</td><td class='num r t-drop'>−7.6%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-cellular-128gb-purple-2026-195950811230_dm54kv' target='_blank' class='model'>Apple iPad Air 11 inch (M4) Wi-Fi + Cellular</a><span class='meta'>11:42 · ลดราคา</span></td><td class='num was r'>฿33,900–55,900</td><td class='num r'>฿30,700–52,700</td><td class='num r t-drop'>−9.4%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-128gb-space-gray-2026-195950797862_zew9v9' target='_blank' class='model'>Apple iPad Air 13 inch (M4) Wi-Fi</a><span class='meta'>11:42 · ลดราคา</span></td><td class='num was r'>฿34,900–56,900</td><td class='num r'>฿31,800–53,800</td><td class='num r t-drop'>−8.9%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr><tr><td class='bar-cell'><span class='bar drop'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3' target='_blank' class='model'>Apple iPad Air 11 inch (M4) Wi-Fi</a><span class='meta'>11:42 · ลดราคา</span></td><td class='num was r'>฿27,900–49,900</td><td class='num r'>฿24,700–46,700</td><td class='num r t-drop'>−11.5%</td><td class='r st'><span class='pill drop'>ลดราคา</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">15 ก.ค. 2026 · 11:30</span>
+          <span class="rule"></span>
+          <span class="id">4 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-m5-wi-fi-cellular-1tb-with-nano-texture-glass-space-black-2025-195950405286_d488ee' target='_blank' class='model'>Apple iPad Pro 13 inch (M5) Wi-Fi + Cellular with Nano-texture glass</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿87,900–106,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-m5-wi-fi-1tb-with-nano-texture-glass-space-black-2025-195950399462_d488oe' target='_blank' class='model'>Apple iPad Pro 13 inch (M5) Wi-Fi with Nano-texture glass</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿80,900–99,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-256gb-with-standard-glass-space-black-2025-195950395464_dl77we' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿42,900–83,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn' target='_blank' class='model'>Apple iPhone 16e White</a><span class='meta'>11:30 · สินค้าหมด</span></td><td class='num was r'>฿19,400–23,400</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">09 ก.ค. 2026 · 11:30</span>
+          <span class="rule"></span>
+          <span class="id">9 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-1tb-with-nano-texture-glass-silver-2024-5th-gen-195949467165_dk0w1j' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi with Nano-texture glass</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿49,900–57,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-256gb-with-standard-glass-space-black-2024-5th-gen-195949222542_dk0wwq' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿29,900–53,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-cellular-128gb-space-gray-2024-7th-gen-195949755279_r0kp9k' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi + Cellular 8.3 inch</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿27,900–38,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿21,900–32,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-cellular-1tb-with-nano-texture-glass-space-black-2025-195950402285_dynnw4' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi + Cellular with Nano-texture glass</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿75,900–94,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-1tb-with-nano-texture-glass-space-black-2025-195950396782_z7gg91' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi with Nano-texture glass</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿68,900–87,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-cellular-128gb-starlight-2026-195950785258_dn8gw2' target='_blank' class='model'>Apple iPad Air 13 inch (M4) Wi-Fi + Cellular</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿40,900–62,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿15,200</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn' target='_blank' class='model'>Apple iPhone 16e White</a><span class='meta'>11:30 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿19,400–23,400</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">07 ก.ค. 2026 · 11:44</span>
+          <span class="rule"></span>
+          <span class="id">7 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-1tb-with-nano-texture-glass-silver-2024-5th-gen-195949467165_dk0w1j' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi with Nano-texture glass</a><span class='meta'>11:44 · สินค้าหมด</span></td><td class='num was r'>฿49,900–57,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-256gb-with-standard-glass-space-black-2024-5th-gen-195949222542_dk0wwq' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi</a><span class='meta'>11:44 · สินค้าหมด</span></td><td class='num was r'>฿29,900–53,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a><span class='meta'>11:44 · สินค้าหมด</span></td><td class='num was r'>฿21,900–32,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-cellular-1tb-with-nano-texture-glass-space-black-2025-195950402285_dynnw4' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi + Cellular with Nano-texture glass</a><span class='meta'>11:44 · สินค้าหมด</span></td><td class='num was r'>฿75,900–94,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-1tb-with-nano-texture-glass-space-black-2025-195950396782_z7gg91' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi with Nano-texture glass</a><span class='meta'>11:44 · สินค้าหมด</span></td><td class='num was r'>฿68,900–87,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-cellular-128gb-starlight-2026-195950785258_dn8gw2' target='_blank' class='model'>Apple iPad Air 13 inch (M4) Wi-Fi + Cellular</a><span class='meta'>11:44 · สินค้าหมด</span></td><td class='num was r'>฿40,900–62,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn' target='_blank' class='model'>Apple iPhone 16e White</a><span class='meta'>11:44 · สินค้าหมด</span></td><td class='num was r'>฿19,400–23,400</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">06 ก.ค. 2026 · 20:00</span>
+          <span class="rule"></span>
+          <span class="id">2 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar rise'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-max-256gb-cosmic-orange-195950639100_dyn0w4' target='_blank' class='model'>Apple iPhone 17 Pro Max</a><span class='meta'>20:00 · ขึ้นราคา</span></td><td class='num was r'>฿48,400–79,900</td><td class='num r'>฿48,900–80,900</td><td class='num r t-rise'>+1.0%</td><td class='r st'><span class='pill rise'>ขึ้นราคา</span></td></tr><tr><td class='bar-cell'><span class='bar rise'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-256gb-deep-blue-195950627657_rqn5v8' target='_blank' class='model'>Apple iPhone 17 Pro</a><span class='meta'>20:00 · ขึ้นราคา</span></td><td class='num was r'>฿43,400–59,900</td><td class='num r'>฿43,900–59,900</td><td class='num r t-rise'>+1.2%</td><td class='r st'><span class='pill rise'>ขึ้นราคา</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">05 ก.ค. 2026 · 20:05</span>
+          <span class="rule"></span>
+          <span class="id">3 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-cellular-256gb-with-standard-glass-silver-2025-195950401080_zv44y4' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi + Cellular</a><span class='meta'>20:05 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿49,900–90,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-128gb-space-gray-2026-195950797862_zew9v9' target='_blank' class='model'>Apple iPad Air 13 inch (M4) Wi-Fi</a><span class='meta'>20:05 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿34,900–56,900</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn' target='_blank' class='model'>Apple iPhone 16e White</a><span class='meta'>20:05 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿19,400–23,400</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr></tbody>
+        </table></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="run-head">
+          <span class="when">03 ก.ค. 2026 · 21:31</span>
+          <span class="rule"></span>
+          <span class="id">3 รายการ</span>
+        </div>
+        <div class="card tbl scroll wide"><table>
+          <thead><tr><th class="bar-cell"></th><th>MODEL / รุ่น</th><th class="r">ก่อน</th>
+            <th class="r">หลัง</th><th class="r">Δ</th><th class="r">สถานะ</th></tr></thead>
+          <tbody><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m3-wi-fi-cellular-128gb-purple-2025-5th-gen-195949986932_z3q030' target='_blank' class='model'>Apple iPad Air 11 inch (M3) Wi-Fi + Cellular</a><span class='meta'>21:31 · สินค้าหมด</span></td><td class='num was r'>฿24,900–42,900</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar oos'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn' target='_blank' class='model'>Apple iPhone 16e White</a><span class='meta'>21:31 · สินค้าหมด</span></td><td class='num was r'>฿19,400–23,400</td><td class='num r'>—</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='bar-cell'><span class='bar restock'></span></td><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16-plus-128gb-ultramarine-195949722844_d40jo2' target='_blank' class='model'>Apple iPhone 16 Plus</a><span class='meta'>21:31 · มีสินค้าแล้ว</span></td><td class='num was r'>—</td><td class='num r'>฿29,500–44,400</td><td class='num r t-neutral empty'>—</td><td class='r st'><span class='pill restock'>มีสินค้าแล้ว</span></td></tr></tbody>
+        </table></div>
+      </div></div>
+</div>
+      
+<div class="view" id="view-tracked">
+    <div class="card tbl">
+      <div class="card-head">iPhone<span class="section-label">15 รุ่น</span></div>
+      <div class="scroll"><table>
+        <thead><tr><th>MODEL / รุ่น</th><th class="r">ราคา</th><th class="r">สถานะ</th></tr></thead>
+        <tbody><tr><td class='name'><a href='https://www.bnn.in.th/th/p/n-s-g-194253128977_z9x626' target='_blank' class='model'>Apple iPhone 13 128GB Green</a></td><td class='num r'>฿14,900</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank' class='model'>Apple iPhone 13 128GB Midnight</a></td><td class='num r'>฿15,200</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-starlight-194252707517_zow0mk' target='_blank' class='model'>Apple iPhone 13 128GB Starlight</a></td><td class='num r'>฿15,200</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-14-128gb-midnight-194253408260_zve03p' target='_blank' class='model'>Apple iPhone 14</a></td><td class='num r'>฿17,100 - ฿34,500</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-15-128gb-pink-195949036255_zwejmp' target='_blank' class='model'>Apple iPhone 15</a></td><td class='num r'>฿23,500 - ฿41,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-15-plus-128gb-black-195949040740_d8qjjk' target='_blank' class='model'>Apple iPhone 15 Plus</a></td><td class='num r'>฿25,900 - ฿46,900</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16-128gb-teal-195949822698_z77oe6' target='_blank' class='model'>Apple iPhone 16</a></td><td class='num r'>฿26,500 - ฿38,800</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16-plus-128gb-ultramarine-195949722844_d40jo2' target='_blank' class='model'>Apple iPhone 16 Plus</a></td><td class='num r'>฿29,500 - ฿44,400</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-black-195950112498_d87xok' target='_blank' class='model'>Apple iPhone 16e Black</a></td><td class='num r'>฿19,400 - ฿23,400</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn' target='_blank' class='model'>Apple iPhone 16e White</a></td><td class='num r'>฿19,400 - ฿23,400</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-256gb-black-195950643596_zo7380' target='_blank' class='model'>Apple iPhone 17</a></td><td class='num r'>฿29,900 - ฿37,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-256gb-deep-blue-195950627657_rqn5v8' target='_blank' class='model'>Apple iPhone 17 Pro</a></td><td class='num r'>฿39,980 - ฿55,980</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-max-256gb-cosmic-orange-195950639100_dyn0w4' target='_blank' class='model'>Apple iPhone 17 Pro Max</a></td><td class='num r'>฿44,980 - ฿76,980</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-17e-256gb-soft-pink-195951030982_dk7k03' target='_blank' class='model'>Apple iPhone 17e</a></td><td class='num r'>฿22,900 - ฿30,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-iphone-air-256gb-light-gold-195950623079_z7g39w' target='_blank' class='model'>Apple iPhone Air</a></td><td class='num r'>฿29,900 - ฿46,500</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr></tbody>
+      </table></div>
+    </div>
+    <div class="card tbl">
+      <div class="card-head">iPad<span class="section-label">24 รุ่น</span></div>
+      <div class="scroll"><table>
+        <thead><tr><th>MODEL / รุ่น</th><th class="r">ราคา</th><th class="r">สถานะ</th></tr></thead>
+        <tbody><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-11-a16-wi-fi-cellular-128gb-pink-2025-11th-gen-195950105377_r67g7n' target='_blank' class='model'>Apple iPad 11 (A16) Wi-Fi + Cellular 11 inch (2025)</a></td><td class='num r'>฿22,900 - ฿33,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-11-a16-wi-fi-128gb-silver-2025-11th-gen-195950086294_zjkpe8' target='_blank' class='model'>Apple iPad 11 (A16) Wi-Fi 11 inch (2025)</a></td><td class='num r'>฿16,900 - ฿27,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m3-wi-fi-128gb-blue-2025-5th-gen-195949997556_z96941' target='_blank' class='model'>Apple iPad Air 11 inch (M3) Wi-Fi</a></td><td class='num r'>฿18,900 - ฿36,900</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m3-wi-fi-cellular-128gb-purple-2025-5th-gen-195949986932_z3q030' target='_blank' class='model'>Apple iPad Air 11 inch (M3) Wi-Fi + Cellular</a></td><td class='num r'>฿24,900 - ฿42,900</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3' target='_blank' class='model'>Apple iPad Air 11 inch (M4) Wi-Fi</a></td><td class='num r'>฿40,900 - ฿62,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-cellular-128gb-purple-2026-195950811230_dm54kv' target='_blank' class='model'>Apple iPad Air 11 inch (M4) Wi-Fi + Cellular</a></td><td class='num r'>฿30,700 - ฿52,700</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m3-wi-fi-256gb-space-grey-2025-2nd-gen-195949976322_zjkpxv' target='_blank' class='model'>Apple iPad Air 13 inch (M3) Wi-Fi</a></td><td class='num r'>฿25,900 - ฿43,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m3-wi-fi-cellular-256gb-space-grey-2025-2nd-gen-195949964800_d20nm6' target='_blank' class='model'>Apple iPad Air 13 inch (M3) Wi-Fi + Cellular</a></td><td class='num r'>฿31,900 - ฿49,900</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-128gb-space-gray-2026-195950797862_zew9v9' target='_blank' class='model'>Apple iPad Air 13 inch (M4) Wi-Fi</a></td><td class='num r'>฿31,800 - ฿53,800</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-cellular-128gb-starlight-2026-195950785258_dn8gw2' target='_blank' class='model'>Apple iPad Air 13 inch (M4) Wi-Fi + Cellular</a></td><td class='num r'>฿37,800 - ฿59,800</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-256gb-with-standard-glass-space-black-2024-5th-gen-195949222542_dk0wwq' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi</a></td><td class='num r'>฿29,900 - ฿53,900</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-1tb-with-nano-texture-glass-silver-2024-5th-gen-195949467165_dk0w1j' target='_blank' class='model'>Apple iPad Pro 11 inch (M4) Wi-Fi with Nano-texture glass</a></td><td class='num r'>฿49,900 - ฿57,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-256gb-with-standard-glass-space-black-2025-195950395464_dl77we' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi</a></td><td class='num r'>฿42,900 - ฿83,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-cellular-256gb-with-standard-glass-silver-2025-195950401080_zv44y4' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi + Cellular</a></td><td class='num r'>฿49,900 - ฿90,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-cellular-1tb-with-nano-texture-glass-space-black-2025-195950402285_dynnw4' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi + Cellular with Nano-texture glass</a></td><td class='num r'>฿75,900 - ฿94,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-m5-wi-fi-1tb-with-nano-texture-glass-space-black-2025-195950396782_z7gg91' target='_blank' class='model'>Apple iPad Pro 11 inch (M5) Wi-Fi with Nano-texture glass</a></td><td class='num r'>฿68,900 - ฿87,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-256gb-with-standard-glass-space-black-2024-7th-gen-195949238710_z3qggl' target='_blank' class='model'>Apple iPad Pro 13 inch (M4) Wi-Fi</a></td><td class='num r'>฿38,900 - ฿67,200</td><td class='r st'><span class='pill oos'>สินค้าหมด</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-1tb-with-nano-texture-glass-space-black-2024-7th-gen-195949467851_z3qg49' target='_blank' class='model'>Apple iPad Pro 13 inch (M4) Wi-Fi with Nano-texture glass</a></td><td class='num r'>฿58,900 - ฿66,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-m5-wi-fi-256gb-with-standard-glass-space-black-2025-195950398144_dx99v6' target='_blank' class='model'>Apple iPad Pro 13 inch (M5) Wi-Fi</a></td><td class='num r'>฿54,900 - ฿95,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-m5-wi-fi-cellular-256gb-with-standard-glass-silver-2025-195950404081_zpxxmp' target='_blank' class='model'>Apple iPad Pro 13 inch (M5) Wi-Fi + Cellular</a></td><td class='num r'>฿61,900 - ฿102,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-m5-wi-fi-cellular-1tb-with-nano-texture-glass-space-black-2025-195950405286_d488ee' target='_blank' class='model'>Apple iPad Pro 13 inch (M5) Wi-Fi + Cellular with Nano-texture glass</a></td><td class='num r'>฿87,900 - ฿106,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-m5-wi-fi-1tb-with-nano-texture-glass-space-black-2025-195950399462_d488oe' target='_blank' class='model'>Apple iPad Pro 13 inch (M5) Wi-Fi with Nano-texture glass</a></td><td class='num r'>฿80,900 - ฿99,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-cellular-128gb-space-gray-2024-7th-gen-195949755279_r0kp9k' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi + Cellular 8.3 inch</a></td><td class='num r'>฿27,900 - ฿38,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr><tr><td class='name'><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank' class='model'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a></td><td class='num r'>฿21,900 - ฿32,900</td><td class='r st'><span class='pill ok'>มีสินค้า</span></td></tr></tbody>
+      </table></div>
+    </div></div>
+      
+<div class="view" id="view-history">
+  <div class="card"><ul class="runs"><li><div class='line'><span class='when'>2026-08-17 23:37:17</span><span class='pill neutral'>ไม่มีการเปลี่ยนแปลง</span></div><p class='muted'>ราคาทุกรุ่นเท่าเดิม</p></li><li><div class='line'><span class='when'>2026-08-17 23:36:38</span><span class='pill neutral'>ไม่มีการเปลี่ยนแปลง</span></div><p class='muted'>ราคาทุกรุ่นเท่าเดิม</p></li><li><div class='line'><span class='when'>2026-08-17 23:29:53</span><span class='pill neutral'>ไม่มีการเปลี่ยนแปลง</span></div><p class='muted'>ราคาทุกรุ่นเท่าเดิม</p></li><li><div class='line'><span class='when'>2026-08-17 23:20:45</span><span class='pill accent'>พบราคาเปลี่ยน</span></div><ul><li><a href='https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3' target='_blank'>Apple iPad Air 11 inch (M4) Wi-Fi</a> <span class='mono t-rise'>฿24,700–46,700 → ฿40,900–62,900 (+65.6%)</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a> <span class='mono t-restock'>฿18,600–29,600 → ฿21,900–32,900 (+17.7%)</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-cellular-128gb-space-gray-2024-7th-gen-195949755279_r0kp9k' target='_blank'>Apple iPad mini 7 (A17 Pro) Wi-Fi + Cellular 8.3 inch</a> <span class='mono t-rise'>฿24,600–35,600 → ฿27,900–38,900 (+13.4%)</span></li><li><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank'>Apple iPhone 13 128GB Midnight</a> <span class='mono t-oos'>฿15,200 → —</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-11-a16-wi-fi-cellular-128gb-pink-2025-11th-gen-195950105377_r67g7n' target='_blank'>Apple iPad 11 (A16) Wi-Fi + Cellular 11 inch (2025)</a> <span class='mono t-restock'>— → ฿22,900–33,900</span></li></ul></li><li><div class='line'><span class='when'>2026-08-17 23:19:50</span><span class='pill bad'>อ่านราคาไม่ได้ ต้องแก้สคริปต์</span></div><p class='muted'>เข้าเว็บได้ แต่อ่านราคาไม่เจอ — หน้าเว็บน่าจะเปลี่ยนโครงสร้าง</p></li><li><div class='line'><span class='when'>2026-08-17 11:37:21</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-16 11:30:06</span><span class='pill bad'>อ่านราคาไม่ได้ ต้องแก้สคริปต์</span></div><p class='muted'>เข้าเว็บได้ แต่อ่านราคาไม่เจอ — หน้าเว็บน่าจะเปลี่ยนโครงสร้าง</p></li><li><div class='line'><span class='when'>2026-08-15 11:38:26</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-14 11:39:49</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-13 11:31:54</span><span class='pill bad'>อ่านราคาไม่ได้ ต้องแก้สคริปต์</span></div><p class='muted'>เข้าเว็บได้ แต่อ่านราคาไม่เจอ — หน้าเว็บน่าจะเปลี่ยนโครงสร้าง</p></li><li><div class='line'><span class='when'>2026-08-12 11:40:26</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-11 11:43:04</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-10 11:32:40</span><span class='pill neutral'>ไม่มีการเปลี่ยนแปลง</span></div><p class='muted'>ราคาทุกรุ่นเท่าเดิม</p></li><li><div class='line'><span class='when'>2026-08-09 11:30:06</span><span class='pill accent'>พบราคาเปลี่ยน</span></div><ul><li><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank'>Apple iPhone 13 128GB Midnight</a> <span class='mono t-restock'>— → ฿15,200</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-air-13-m3-wi-fi-cellular-256gb-space-grey-2025-2nd-gen-195949964800_d20nm6' target='_blank'>Apple iPad Air 13 inch (M3) Wi-Fi + Cellular</a> <span class='mono t-oos'>฿31,900–49,900 → —</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a> <span class='mono t-oos'>฿18,600–29,600 → —</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-11-inch-wi-fi-256gb-with-standard-glass-space-black-2024-5th-gen-195949222542_dk0wwq' target='_blank'>Apple iPad Pro 11 inch (M4) Wi-Fi</a> <span class='mono t-oos'>฿29,900–53,900 → —</span></li></ul></li><li><div class='line'><span class='when'>2026-08-08 11:37:58</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-07 11:40:28</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-06 11:43:33</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-05 11:31:49</span><span class='pill accent'>พบราคาเปลี่ยน</span></div><ul><li><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank'>Apple iPhone 13 128GB Midnight</a> <span class='mono t-oos'>฿15,200 → —</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a> <span class='mono t-restock'>— → ฿18,600–29,600</span></li></ul></li><li><div class='line'><span class='when'>2026-08-04 11:43:20</span><span class='pill accent'>พบราคาเปลี่ยน</span></div><ul><li><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank'>Apple iPhone 13 128GB Midnight</a> <span class='mono t-restock'>— → ฿15,200</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a> <span class='mono t-oos'>฿18,600–29,600 → —</span></li></ul></li><li><div class='line'><span class='when'>2026-08-03 11:33:11</span><span class='pill accent'>พบราคาเปลี่ยน</span></div><ul><li><a href='https://www.bnn.in.th/th/p/apple-iphone-17-256gb-black-195950643596_zo7380' target='_blank'>Apple iPhone 17</a> <span class='mono t-rise'>฿29,500–37,500 → ฿29,900–37,900 (+1.4%)</span></li><li><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-256gb-deep-blue-195950627657_rqn5v8' target='_blank'>Apple iPhone 17 Pro</a> <span class='mono t-drop'>฿43,900–59,900 → ฿39,980–55,980 (−8.9%)</span></li><li><a href='https://www.bnn.in.th/th/p/apple-iphone-17-pro-max-256gb-cosmic-orange-195950639100_dyn0w4' target='_blank'>Apple iPhone 17 Pro Max</a> <span class='mono t-drop'>฿48,900–80,900 → ฿44,980–76,980 (−8.0%)</span></li><li><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank'>Apple iPhone 13 128GB Midnight</a> <span class='mono t-oos'>฿15,200 → —</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a> <span class='mono t-restock'>— → ฿18,600–29,600</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-256gb-with-standard-glass-space-black-2024-7th-gen-195949238710_z3qggl' target='_blank'>Apple iPad Pro 13 inch (M4) Wi-Fi</a> <span class='mono t-oos'>฿38,900–67,200 → —</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-1tb-with-nano-texture-glass-space-black-2024-7th-gen-195949467851_z3qg49' target='_blank'>Apple iPad Pro 13 inch (M4) Wi-Fi with Nano-texture glass</a> <span class='mono t-restock'>— → ฿58,900–66,900</span></li></ul></li><li><div class='line'><span class='when'>2026-08-02 11:42:18</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-08-01 11:41:49</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-31 11:32:00</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-30 11:31:51</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-29 11:37:26</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-28 11:44:50</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-27 11:43:04</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-26 11:35:51</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-25 11:44:55</span><span class='pill warn'>เน็ตไม่ติด ข้ามรอบนี้</span></div><p class='muted'>ต่ออินเทอร์เน็ตไม่ได้ตอนที่รัน จึงข้ามรอบนี้ไป</p></li><li><div class='line'><span class='when'>2026-07-24 11:42:52</span><span class='pill accent'>พบราคาเปลี่ยน</span></div><ul><li><a href='https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0' target='_blank'>Apple iPhone 13 128GB Midnight</a> <span class='mono t-restock'>— → ฿15,200</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-mini-83-inch-wi-fi-128gb-blue-2024-7th-gen-195949729256_zvjqyp' target='_blank'>Apple iPad mini 7 (A17 Pro) Wi-Fi 8.3 inch</a> <span class='mono t-oos'>฿18,600–29,600 → —</span></li><li><a href='https://www.bnn.in.th/th/p/apple-ipad-pro-13-inch-wi-fi-256gb-with-standard-glass-space-black-2024-7th-gen-195949238710_z3qggl' target='_blank'>Apple iPad Pro 13 inch (M4) Wi-Fi</a> <span class='mono t-restock'>— → ฿38,900–67,200</span></li></ul></li></ul></div>
+</div>
+    </div>
+
+    <footer>generated 2026-08-18 07:07:27</footer>
+  </main>
+</div>
+<nav class="tabbar"><a href='#overview' data-view='overview'><span class='ico'></span><span>ภาพรวม</span></a><a href='#changes' data-view='changes'><span class='ico'></span><span>การเปลี่ยนแปลง</span></a><a href='#tracked' data-view='tracked'><span class='ico'></span><span>สินค้าที่ติดตาม</span></a><a href='#history' data-view='history'><span class='ico'></span><span>ประวัติการตรวจ</span></a></nav>
+<script>
+(function () {
+  var links = document.querySelectorAll('[data-view]');
+  function show(name) {
+    document.querySelectorAll('.view').forEach(function (v) {
+      v.classList.toggle('active', v.id === 'view-' + name);
+    });
+    links.forEach(function (l) {
+      l.classList.toggle('active', l.dataset.view === name);
+    });
+    if (location.hash.slice(1) !== name) history.replaceState(null, '', '#' + name);
+    window.scrollTo(0, 0);
+  }
+  links.forEach(function (l) {
+    l.addEventListener('click', function (e) { e.preventDefault(); show(l.dataset.view); });
+  });
+  var initial = location.hash.slice(1);
+  show(document.getElementById('view-' + initial) ? initial : 'overview');
+})();
+</script>
+</body>
+</html>
