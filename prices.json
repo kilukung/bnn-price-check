@@ -86,7 +86,7 @@
   "apple-iphone-13-128gb-midnight-194252707241_dxlvy0": {
     "name": "Apple iPhone 13 128GB Midnight",
     "price": "฿15,200",
-    "out_of_stock": true,
+    "out_of_stock": false,
     "url": "https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0",
     "category": "iPhone"
   },
