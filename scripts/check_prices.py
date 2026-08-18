@@ -202,6 +202,7 @@ def main():
 
     save_state(new_state)
     rebuild_dashboard()
+    publish_site()
 
 
 def rebuild_dashboard():
@@ -213,6 +214,39 @@ def rebuild_dashboard():
         build_dashboard.main()
     except Exception as e:  # never let the dashboard break the price check
         log(f"Dashboard build failed: {e}")
+
+
+def publish_site():
+    """Commit this run and push, so the GitHub Pages copy stays current.
+
+    Skipped silently when there is no 'origin' remote configured, so the
+    script keeps working on a machine that is not set up for publishing.
+    """
+    import subprocess
+
+    def git(*args):
+        return subprocess.run(
+            ["git", "-C", str(BASE_DIR), *args],
+            capture_output=True, text=True, timeout=120,
+        )
+
+    try:
+        if git("remote", "get-url", "origin").returncode != 0:
+            return
+        if not git("status", "--porcelain").stdout.strip():
+            return  # nothing changed this run
+
+        git("add", "-A", ".")
+        stamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+        commit = git("commit", "-m", f"Price check {stamp}")
+        if commit.returncode != 0:
+            log(f"Publish skipped, commit failed: {commit.stderr.strip()[:200]}")
+            return
+        push = git("push")
+        if push.returncode != 0:
+            log(f"Publish skipped, push failed: {push.stderr.strip()[:200]}")
+    except Exception as e:  # publishing must never break the price check
+        log(f"Publish failed: {e}")
 
 
 if __name__ == "__main__":

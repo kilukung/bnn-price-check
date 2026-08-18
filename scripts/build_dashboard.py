@@ -10,6 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 LOG_FILE = BASE_DIR / "check_prices.log"
 STATE_FILE = BASE_DIR / "prices.json"
 OUT_FILE = BASE_DIR / "dashboard.html"
+# GitHub Pages serves index.html; keep it a copy so the local bookmark still works.
+SITE_FILE = BASE_DIR / "index.html"
 
 RUN_START_RE = re.compile(r"^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\] (.*)$")
 
@@ -244,15 +246,23 @@ a { color:inherit; text-decoration:none; }
   position:sticky; top:0; height:100vh;
 }
 .brand { display:flex; align-items:center; gap:10px; padding:0 8px; }
-.brand .mark { width:26px; height:26px; border-radius:8px; background:var(--accent); flex:none; }
+.brand .mark {
+  width:26px; height:26px; border-radius:8px; background:var(--accent); flex:none;
+  display:flex; align-items:center; justify-content:center; color:var(--text);
+}
+.brand .mark .ico { width:15px; height:15px; }
+.ico { width:17px; height:17px; flex:none; }
 .brand .name { font:600 14px "IBM Plex Sans",sans-serif; }
 .nav { display:flex; flex-direction:column; gap:2px; }
 .nav a {
-  padding:9px 12px; border-radius:9px; color:var(--dim);
+  padding:9px 12px; border-radius:9px; color:var(--dim); gap:10px;
   font:500 13.5px "IBM Plex Sans Thai",sans-serif;
   display:flex; align-items:center; justify-content:space-between; gap:8px;
 }
 .nav a:hover { background:var(--neutral-bg); }
+.nav a .label { flex:1; }
+.nav a .ico { color:var(--faint); }
+.nav a.active .ico { color:var(--accent-ink); }
 .nav a .en { font:400 11px "IBM Plex Sans",sans-serif; color:var(--faint); }
 .nav a.active { background:var(--accent-soft); color:var(--accent-ink); font-weight:600; }
 .nav a.active .en { color:#b58c2b; }
@@ -404,9 +414,9 @@ footer { padding:0 28px 40px; color:var(--faint); font:400 11.5px "IBM Plex Mono
     flex:1; display:flex; flex-direction:column; align-items:center; gap:5px;
     color:var(--faint); font:500 10.5px "IBM Plex Sans Thai",sans-serif;
   }
-  .tabbar a .ico { width:22px; height:22px; border-radius:6px; border:2px solid var(--faint); }
+  .tabbar a .ico { width:23px; height:23px; stroke-width:1.6; }
   .tabbar a.active { color:var(--accent-ink); }
-  .tabbar a.active .ico { background:var(--accent); border-color:var(--accent); }
+  .tabbar a.active .ico { color:var(--accent-ink); }
 }
 """
 
@@ -430,6 +440,31 @@ SCRIPT = """
   show(document.getElementById('view-' + initial) ? initial : 'overview');
 })();
 """
+
+# Inline stroke icons — no external requests, and they inherit the link colour.
+def icon(paths, fill=""):
+    return (f"<svg class='ico' viewBox='0 0 24 24' fill='none' stroke='currentColor' "
+            f"stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' "
+            f"aria-hidden='true'>{paths}</svg>")
+
+
+ICONS = {
+    # overview: the four stat tiles of the page itself
+    "overview": "<rect x='3' y='3' width='7.5' height='7.5' rx='1.6'/>"
+                "<rect x='13.5' y='3' width='7.5' height='7.5' rx='1.6'/>"
+                "<rect x='3' y='13.5' width='7.5' height='7.5' rx='1.6'/>"
+                "<rect x='13.5' y='13.5' width='7.5' height='7.5' rx='1.6'/>",
+    # changes: a price line that falls then rises
+    "changes": "<path d='M3 16.5l5-5 3.5 3.5L21 6'/><path d='M15 6h6v6'/>",
+    # tracked: a price tag
+    "tracked": "<path d='M20.5 12.9l-7.6 7.6a1.9 1.9 0 01-2.7 0l-6.7-6.7A1.9 1.9 0 013 12.5V5a2 2 0 012-2h7.5c.5 0 1 .2 1.4.6l6.6 6.6a1.9 1.9 0 010 2.7z'/>"
+               "<circle cx='8.2' cy='8.2' r='1.3' fill='currentColor' stroke='none'/>",
+    # history: a scheduled check, clock with hands at the daily run
+    "history": "<circle cx='12' cy='12' r='9'/><path d='M12 7v5.2l3.2 2'/>",
+    # brand: the alert bell the whole page is built around
+    "brand": "<path d='M18 8.5a6 6 0 10-12 0c0 5.2-2 6.8-2 6.8h16s-2-1.6-2-6.8z'/>"
+             "<path d='M13.7 19a2 2 0 01-3.4 0'/>",
+}
 
 NAV = [
     ("overview", "ภาพรวม", "Overview"),
@@ -660,14 +695,14 @@ def render(runs, products):
 
     nav = "".join(
         f"<a href='#{key}' data-view='{key}'>"
-        f"<span>{th}</span>"
+        f"{icon(ICONS[key])}<span class='label'>{th}</span>"
         + (f"<span class='badge'>{today_count}</span>" if key == "changes" and today_count
            else f"<span class='en'>{en}</span>")
         + "</a>"
         for key, th, en in NAV
     )
     tabs = "".join(
-        f"<a href='#{key}' data-view='{key}'><span class='ico'></span><span>{th}</span></a>"
+        f"<a href='#{key}' data-view='{key}'>{icon(ICONS[key])}<span>{th}</span></a>"
         for key, th, _ in NAV
     )
 
@@ -688,7 +723,7 @@ def render(runs, products):
 <body>
 <div class="shell">
   <aside class="side">
-    <div class="brand"><span class="mark"></span><span class="name">Price Watch</span></div>
+    <div class="brand"><span class="mark">{icon(ICONS['brand'])}</span><span class="name">Price Watch</span></div>
     <nav class="nav">{nav}</nav>
     <div class="side-health h-{health[0]}">
       <div class="title"><span class="dot"></span>{esc(health[1])}</div>
@@ -729,8 +764,10 @@ def render(runs, products):
 def main():
     runs = parse_runs()
     products = json.loads(STATE_FILE.read_text(encoding="utf-8")) if STATE_FILE.exists() else {}
-    OUT_FILE.write_text(render(runs, products), encoding="utf-8")
-    print(f"Dashboard written to {OUT_FILE}")
+    page = render(runs, products)
+    OUT_FILE.write_text(page, encoding="utf-8")
+    SITE_FILE.write_text(page, encoding="utf-8")
+    print(f"Dashboard written to {OUT_FILE} and {SITE_FILE}")
 
 
 if __name__ == "__main__":
