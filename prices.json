@@ -50,7 +50,7 @@
   },
   "apple-iphone-16e-128gb-white-195950112504_dmx9vn": {
     "name": "Apple iPhone 16e White",
-    "price": "฿23,500 - ฿41,900",
+    "price": "฿19,400 - ฿23,400",
     "out_of_stock": true,
     "url": "https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn",
     "category": "iPhone"
@@ -86,7 +86,7 @@
   "apple-iphone-13-128gb-midnight-194252707241_dxlvy0": {
     "name": "Apple iPhone 13 128GB Midnight",
     "price": "฿15,200",
-    "out_of_stock": false,
+    "out_of_stock": true,
     "url": "https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0",
     "category": "iPhone"
   },
@@ -106,28 +106,28 @@
   },
   "apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3": {
     "name": "Apple iPad Air 11 inch (M4) Wi-Fi",
-    "price": "฿40,900 - ฿62,900",
+    "price": "฿27,900 - ฿49,900",
     "out_of_stock": false,
     "url": "https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3",
     "category": "iPad"
   },
   "apple-ipad-air-13-m4-wi-fi-128gb-space-gray-2026-195950797862_zew9v9": {
     "name": "Apple iPad Air 13 inch (M4) Wi-Fi",
-    "price": "฿31,800 - ฿53,800",
+    "price": "฿34,900 - ฿56,900",
     "out_of_stock": false,
     "url": "https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-128gb-space-gray-2026-195950797862_zew9v9",
     "category": "iPad"
   },
   "apple-ipad-air-11-m4-wi-fi-cellular-128gb-purple-2026-195950811230_dm54kv": {
     "name": "Apple iPad Air 11 inch (M4) Wi-Fi + Cellular",
-    "price": "฿30,700 - ฿52,700",
+    "price": "฿33,900 - ฿55,900",
     "out_of_stock": false,
     "url": "https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-cellular-128gb-purple-2026-195950811230_dm54kv",
     "category": "iPad"
   },
   "apple-ipad-air-13-m4-wi-fi-cellular-128gb-starlight-2026-195950785258_dn8gw2": {
     "name": "Apple iPad Air 13 inch (M4) Wi-Fi + Cellular",
-    "price": "฿37,800 - ฿59,800",
+    "price": "฿40,900 - ฿62,900",
     "out_of_stock": false,
     "url": "https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-cellular-128gb-starlight-2026-195950785258_dn8gw2",
     "category": "iPad"
@@ -190,7 +190,7 @@
   },
   "apple-ipad-11-a16-wi-fi-128gb-silver-2025-11th-gen-195950086294_zjkpe8": {
     "name": "Apple iPad 11 (A16) Wi-Fi 11 inch (2025)",
-    "price": "฿22,900 - ฿33,900",
+    "price": "฿16,900 - ฿27,900",
     "out_of_stock": false,
     "url": "https://www.bnn.in.th/th/p/apple-ipad-11-a16-wi-fi-128gb-silver-2025-11th-gen-195950086294_zjkpe8",
     "category": "iPad"
@@ -204,7 +204,7 @@
   },
   "apple-ipad-air-11-m3-wi-fi-128gb-blue-2025-5th-gen-195949997556_z96941": {
     "name": "Apple iPad Air 11 inch (M3) Wi-Fi",
-    "price": "฿24,900 - ฿42,900",
+    "price": "฿18,900 - ฿36,900",
     "out_of_stock": true,
     "url": "https://www.bnn.in.th/th/p/apple-ipad-air-11-m3-wi-fi-128gb-blue-2025-5th-gen-195949997556_z96941",
     "category": "iPad"

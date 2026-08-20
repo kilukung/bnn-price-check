@@ -325,3 +325,36 @@ https://www.bnn.in.th/th/p/apple-ipad-air-11-m3-wi-fi-128gb-blue-2025-5th-gen-19
 [2026-08-20 11:33:59] No price changes detected, but fetch had errors: iPhone: fetch failed (<urlopen error [Errno 8] nodename nor servname provided, or not known>); iPad: fetch failed (<urlopen error [Errno 8] nodename nor servname provided, or not known>)
 [2026-08-20 11:33:59] Publish skipped, push failed: fatal: unable to access 'https://github.com/kilukung/bnn-price-check.git/': Could not resolve host: github.com
 [2026-08-20 15:06:07] No price changes detected, but fetch had errors: iPhone: fetch failed (<urlopen error [Errno 8] nodename nor servname provided, or not known>); iPad: fetch failed (<urlopen error [Errno 8] nodename nor servname provided, or not known>)
+[2026-08-20 15:06:07] Publish skipped, push failed: fatal: unable to access 'https://github.com/kilukung/bnn-price-check.git/': Could not resolve host: github.com
+[2026-08-20 16:12:48] ราคา BaNANA เปลี่ยนแปลง:
+
+Apple iPhone 16e White
+฿23,500 - ฿41,900 -> ฿19,400 - ฿23,400
+https://www.bnn.in.th/th/p/apple-iphone-16e-128gb-white-195950112504_dmx9vn
+
+Apple iPad Air 11 inch (M4) Wi-Fi
+฿40,900 - ฿62,900 -> ฿27,900 - ฿49,900
+https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-128gb-blue-2026-195950823851_zgeqq3
+
+Apple iPad Air 13 inch (M4) Wi-Fi
+฿31,800 - ฿53,800 -> ฿34,900 - ฿56,900
+https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-128gb-space-gray-2026-195950797862_zew9v9
+
+Apple iPad Air 11 inch (M4) Wi-Fi + Cellular
+฿30,700 - ฿52,700 -> ฿33,900 - ฿55,900
+https://www.bnn.in.th/th/p/apple-ipad-air-11-m4-wi-fi-cellular-128gb-purple-2026-195950811230_dm54kv
+
+Apple iPad Air 13 inch (M4) Wi-Fi + Cellular
+฿37,800 - ฿59,800 -> ฿40,900 - ฿62,900
+https://www.bnn.in.th/th/p/apple-ipad-air-13-m4-wi-fi-cellular-128gb-starlight-2026-195950785258_dn8gw2
+
+Apple iPad 11 (A16) Wi-Fi 11 inch (2025)
+฿22,900 - ฿33,900 -> ฿16,900 - ฿27,900
+https://www.bnn.in.th/th/p/apple-ipad-11-a16-wi-fi-128gb-silver-2025-11th-gen-195950086294_zjkpe8
+
+Apple iPad Air 11 inch (M3) Wi-Fi
+฿24,900 - ฿42,900 -> ฿18,900 - ฿36,900
+https://www.bnn.in.th/th/p/apple-ipad-air-11-m3-wi-fi-128gb-blue-2025-5th-gen-195949997556_z96941
+
+Apple iPhone 13 128GB Midnight — สินค้าหมด (ราคา ฿15,200)
+https://www.bnn.in.th/th/p/apple-iphone-13-128gb-midnight-194252707241_dxlvy0
