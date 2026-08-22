@@ -35,12 +35,22 @@ HEADERS = {
     "Sec-Fetch-Dest": "document",
 }
 
-PRODUCT_RE = re.compile(
+# Each product is one <a class="product-link ... product-item"> card. Name and
+# price are pulled from inside a single card only: a regex that scanned across
+# card boundaries used to pair a model with its neighbour's price, which showed
+# up as false "price changed" alerts (e.g. iPhone 16e reported at iPhone 15's price).
+CARD_START_RE = re.compile(
     r'<a href="/th/p/(?P<slug>[^"?]+)\?ref=category[^"]*"\s+class="product-link[^"]*product-item"'
-    r'.*?title="[^"]*"\s+class="product-name"[^>]*>\s*(?P<name>[^<]+?)\s*</div>'
-    r'.*?class="product-price"[^>]*>\s*(?:<span[^>]*>)?\s*(?P<price>[^<]+?)\s*(?:</span>)?\s*(?:<!---->)?\s*</div>',
+)
+NAME_RE = re.compile(r'class="product-name"[^>]*>\s*(?P<name>[^<]+?)\s*</div>', re.S)
+PRICE_RE = re.compile(
+    r'class="product-price"[^>]*>\s*(?:<span[^>]*>)?\s*(?P<price>[^<]+?)\s*'
+    r'(?:</span>)?\s*(?:<!---->)?\s*</div>',
     re.S,
 )
+# "ประหยัดไป ฿3,200" — the campaign discount already reflected in product-price.
+SAVE_RE = re.compile(r'ประหยัดไป\s*<strong[^>]*>฿(?P<save>[\d,]+)', re.S)
+BAHT_RE = re.compile(r"฿\s*([\d,]+)")
 
 
 def log(msg):
@@ -57,17 +67,58 @@ def fetch(url):
 
 
 def parse_products(html, category):
+    """Parse one product per card, never letting a card borrow its neighbour's price."""
     products = {}
-    for m in PRODUCT_RE.finditer(html):
+    matches = list(CARD_START_RE.finditer(html))
+    for m, nxt in zip(matches, matches[1:] + [None]):
+        card = html[m.end():nxt.start() if nxt else len(html)]
+        name = NAME_RE.search(card)
+        price = PRICE_RE.search(card)
+        if not name or not price:
+            continue  # not a product card, or markup changed
+
         slug = m.group("slug")
+        save = SAVE_RE.search(card)
         products[slug] = {
-            "name": m.group("name").strip(),
-            "price": " ".join(m.group("price").split()),
-            "out_of_stock": "สินค้าหมด" in m.group(0),
+            "name": name.group("name").strip(),
+            "price": " ".join(price.group("price").split()),
+            "save": int(save.group("save").replace(",", "")) if save else 0,
+            "out_of_stock": "สินค้าหมด" in card,
             "url": f"https://www.bnn.in.th/th/p/{slug}",
             "category": category,
         }
     return products
+
+
+def baht_values(price_text):
+    return [int(v.replace(",", "")) for v in BAHT_RE.findall(price_text or "")]
+
+
+def is_discount_flip(old, new):
+    """True when the two prices differ only by the campaign discount.
+
+    bnn.in.th sometimes serves the listing with the "ประหยัดไป" discount already
+    applied and sometimes without it. Every number in the range then shifts by
+    exactly the discount, which is not a real price change and must not alert.
+    """
+    old_save, new_save = old.get("save", 0), new.get("save", 0)
+    # Exactly one side must be the undiscounted render, and it must be the dearer one.
+    if (old_save == 0) == (new_save == 0):
+        return False
+
+    old_values, new_values = baht_values(old.get("price")), baht_values(new.get("price"))
+    if not old_values or len(old_values) != len(new_values):
+        return False
+
+    shifts = {o - n for o, n in zip(old_values, new_values)}
+    if len(shifts) != 1:
+        return False  # the numbers moved independently, so it is a real change
+    shift = shifts.pop()
+
+    discount = old_save or new_save
+    # shift is old - new, so the undiscounted (dearer) side decides the sign.
+    dearer_is_undiscounted = shift < 0 if new_save == 0 else shift > 0
+    return abs(shift) == discount and dearer_is_undiscounted
 
 
 def load_state():
@@ -141,6 +192,7 @@ def main():
     old_state = load_state()
     new_state = dict(old_state)
     changes = []
+    flips = []
     errors = []
 
     for category, url in CATEGORIES.items():
@@ -160,8 +212,21 @@ def main():
             new_state[slug] = product
             if old is None:
                 continue
-            if old["price"] != product["price"] or old["out_of_stock"] != product["out_of_stock"]:
+
+            price_moved = old["price"] != product["price"]
+            stock_moved = old["out_of_stock"] != product["out_of_stock"]
+            if price_moved and not stock_moved and is_discount_flip(old, product):
+                # Keep the discounted figure on file so the saved price matches
+                # what a shopper actually sees on the site.
+                if not product["save"]:
+                    new_state[slug] = dict(product, price=old["price"], save=old.get("save", 0))
+                flips.append(f"{product['name']}: {old['price']} / {product['price']}")
+                continue
+            if price_moved or stock_moved:
                 changes.append((old, product))
+
+    if flips:
+        log("ข้ามส่วนลดที่เว็บสลับไปมา (ไม่ใช่ราคาเปลี่ยนจริง): " + "; ".join(flips))
 
     price_changes = [(o, n) for o, n in changes if o["price"] != n["price"]]
     stock_changes = [(o, n) for o, n in changes if o["price"] == n["price"]]
